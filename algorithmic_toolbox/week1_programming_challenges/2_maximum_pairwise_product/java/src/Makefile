@@ -1,11 +1,16 @@
 SHELL := /usr/bin/env bash
 MAKEFLAGS += --silent
 
-.PHONY: main test
+.PHONY: clean build run test
 
-main:
+clean:
+	rm -f MaxPairwiseProduct.class
+
+build:
 	javac MaxPairwiseProduct.java
-	echo 'Run the program with: java MaxPairwiseProduct <<< "3 1 2 3"'
+
+run:
+	java MaxPairwiseProduct <<< "3 1 2 3"
 
 test:
 	javac MaxPairwiseProduct.java TestMaxPairwiseProduct.java
