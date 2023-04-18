@@ -5,3 +5,4 @@
 ## [Algorithms and Data Structures](https://www.coursera.org/specializations/data-structures-algorithms)
 
 1. [Algorithmic Toolbox](https://www.coursera.org/learn/algorithmic-toolbox?specialization=data-structures-algorithms)
+2. [Data Structures](https://www.coursera.org/learn/data-structures)
