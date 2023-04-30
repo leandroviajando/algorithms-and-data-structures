@@ -184,3 +184,104 @@ $$
 $$
 
 *Note not to use a constant amount when resizing*: if you were to add a constant amount, e.g. expand by 10 elements each time, instead of a resize factor, the amortised cost would be quadratic!
+
+## Priority Queues and Disjoint Sets
+
+### Priority Queues
+
+C++'s `priority_queue`, Java's `PriorityQueue` and Python's `heapq` are implementations of the priority queue data structure:
+
+- `Insert(p)`: adds a new element with priority `p`
+- `ExtractMax()`: extracts an element with maximum priority
+
+| | `Insert` | `ExtractMax` |
+| --- | --- | --- |
+| Unsorted array / list | $O(1)$ | $O(n)$ |
+| Sorted array / list | $O(n)$ | $O(1)$ |
+| Binary heap | $O(\log n)$ | $O(\log n)$ |
+
+Some additional operations might be:
+
+- `Remove(it)`: removes an element pointed by an iterator `it`
+- `GetMax()`: returns an element with maximum priority (without changing the set of elements)
+- `ChangePriority(it, p)`: changes the priority of an element pointed by `it` to `p`
+
+### Binary Heaps
+
+A heap is a tree-based data structure that satisfies the **heap property:**
+
+- A **binary max-heap** is a binary tree (i.e. each node has zero, one or two children) where the value of each node has value greater than or equal to its children's values.
+- A **binary min-heap** is a binary tree (i.e. each node has zero, one or two children) where the value of each node has value less than or equal to its children's values.
+
+The `Insert` operation is handled with `SiftUp`, and the `ExtractMax` operation with `SiftDown` - which both run in $O(\text{tree height})$ time.
+
+The height of a d-ary tree (where all nodes have `d` children) is $\log_d(n)$ and the running time of `SiftUp` is $O(\log_d(n))$. For a binary tree, $d=2$.
+
+#### Complete Binary Trees
+
+A binary tree is **complete** if all its levels are filled, except possibly the last one, which must be filled *from left to right*.
+
+Keeping a binary tree complete has two advantages:
+
+- A complete binary tree with $n$ nodes has height at most $O(\log n)$.
+- It can easily be stored in an array.
+
+### Heap Sort
+
+A heap (for implementation of a priority queue) can be created in $n \log(n)$ time, where the $\log(n)$ `SiftDown` procedure is called for $O(n)$ nodes.
+
+Note that this is in fact a pessimistic upper bound. Because many of the nodes closer to the root will not take logarithmic time to sift down. It can be shown that this actually runs in $O(n + \frac{1}{2}n + \frac{1}{3}n + \frac{1}{4}n + \dots) = O(2n)$ linear time.
+
+An application is a **partial sort** of the $k$ largest of $n$ elements: build a heap and `ExtractMax` $k$ times. This can be solved in $O(n)$, if $k = O(\frac{n}{\log n})$ because then $O(k \log n) = O(n)$. (Recall also from course 1 that sorting is $O(n \log n)$.)
+
+### Disjoint Sets
+
+A disjoint-set data structure supports the following operations:
+
+- `MakeSet(x)`: creates a singleton set `{x}`
+- `Find(x)`: returns the ID of the set containing `x`, i.e. can compare `Find(x) == Find(y)`
+- `Union(x, y)`: merges two sets containing `x` and `y`
+
+#### Disjoint Sets represented as Trees
+
+This data structure can be **represented efficiently as a tree:**
+
+- Represent each set as a rooted tree
+- The ID of a set is the root of the tree
+- `parent[i ... k] = parent[i]` where `i` is the root node
+
+#### Union by rank
+
+When merging two trees, in order minimise tree height, *hang the shorter one under the root of the taller one* (which increases the resulting tree's height by max $1$ - if both have equal height)
+
+To quickly find the height of a tree, keep track of of the heights of all subtrees in an array `rank[i ... n]` where `rank[i]` is the height of the subtree whose root is `i`
+
+*Lemma:* The height of any tree in the forest is at most $log_2 n$.
+
+*The union by rank heuristic guarantees that `Union` and `Find` work in time $O(\log n)$.*
+
+#### Path Compression
+
+```pseudocode
+if i != parent[i]:
+  parent[i] <- Find(parent[i])
+return parent[i]
+```
+
+The **iterated logarithm** of $n$, $\log^* n$, is the number of times the logarithm function needs to be applied to $n$ before the result is less or equal than 1; i.e. at most $5$ for practical values of $n$:
+
+| $n$ | $\log^* n$ |
+| --- | --- |
+| $1$ | $0$ |
+| $2$ | $1$ |
+| $\{3, 4\}$ | $2$ |
+| $\{5, 6, ..., 16\}$ | $3$ |
+| $\{17, ... , 2^{16}\}$ | $4$ |
+| $\{2^{16}, ... 2^{2^{16}}\}$ | 5 |
+
+Assume that initially the data structure is empty. We make a sequence of $m$ operations including $n$ calls to `MakeSet`.
+
+Then, using both union by rank and path compression heuristics:
+
+- the total running time is $O(m \log^* n)$
+- the amortised time for a single operation is thus $O(\log^* n)$, where $n \leq 5$
