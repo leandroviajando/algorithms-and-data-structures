@@ -1,4 +1,6 @@
 [flake8]
 exclude = .venv/
 ignore = ANN101,E203,E501,E741,PD005,T201,VNE001,W503
+per-file-ignores =
+  ./data_structures/week4_hashing/hash_chains/hash_chains.py: E800
 max-complexity = 3
