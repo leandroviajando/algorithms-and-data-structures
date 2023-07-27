@@ -481,3 +481,62 @@ To avoid sending each lender hashes of the whole diary to check just one transac
 To check that a transaction is recorded in a block, we saw that we need to send the whole chain of transactions inside the block and compute the whole chain of hashes. Thus, it requires $O(n)$ time for $n$ transactions in a block.
 
 *A Merkle tree is a binary tree that makes it possible to reduce this time to* $O(\log n)$.
+
+## Binary Search Trees
+
+Motivation: Need a data structure for *local search*
+
+**Search tree property:** X's key is larger than the key of any descendent of its left child, and smaller than the key of any descendent of its right child.
+
+Optimally, we want a **(perfectly) balanced tree**, i.e. one where the left and right subtrees have approximately the same size.
+
+### AVL Trees
+
+Motivation: Want to maintain tree balance
+
+**AVL property:** For all nodes $N$, $\lvert N.Left.Height - N.Right.Height \rvert \leq 1$
+
+Question: Suppose we enforce the AVL property only for the root of the tree, but not for all the nodes. Can such a tree be unbalanced? Yes. Such a tree could have height $n/2$ where $n$ is the number of nodes: two chains of length $n/2$ having root as the only common node form such a tree.
+
+If you can maintain the AVL property, you can perform all operations (incl. rebalancing operations themselves) in $O(\log(n))$ time.
+
+#### Split and Merge
+
+Another useful feature of binary search trees is the ability to recombine them in interesting ways:
+
+- `Merge` combines two binary search trees into a single one.
+- `Split` breaks one binary search tree into two.
+
+`AVLMergeWithRoot` maintains balance and runs in $O(h_{max}) = O(\log(n))$.
+
+Question: Can the `Insert` operation be implemented given only Split and Merge operations? Yes. First create a new tree with a single key - the key to be inserted. Then split the current tree by this key. Then merge the left splitted part with the new tree. Then merge the result with the right splitted part.
+
+Question: Can the `Delete` operation be implemented given only Split and Merge operations? Yes. Suppose we are deleting key $x$. Split the key twice: one split such that all the keys $\lt x$ go to the left, and all the keys $\geq x$ go to the right. Then split the right part of the first split such that all the keys $\leq x$ go to the left and all the keys $gt x$ go to the right. Then merge the left part of the first split and the right part of the second split - thus leaving out the node with key $x$.
+
+### Splay Trees
+
+Idea: Want common nodes near root in order to make search for those faster (than $O(\log(n))$).
+
+The `Splay` operation can be used to rebalance a search tree to this end, i.e. to bring each query node to the root.
+
+The amortised cost of doing $O(D)$ work and then splaying a node of depth $D$ is $O(\log(n))$ where $n$ is the total number of nodes.
+
+Consider a a node at depth $D$. Then
+
+- $O(D)$ time to find $N$.
+- Splay N.
+- Amortised cost $O(\log(n))$.
+
+You pay for the work of finding $N$ by splaying to rebalance the tree.
+
+In summary, splay trees perform all operations simply in $O(\log(n))$ amortised time.
+
+Question: What will happen if you forget to splay the last accessed vertex in the implementation of `Find` in case the key was not found in the splay tree?
+
+The tree will still work but be [slow](https://www.cs.usfca.edu/~galles/visualization/SplayTree.html) on some sequences of operations.
+
+Question: What will happen if you splay the node with the smallest key in a splay tree? The root of the new tree won't have a left child. The node with the smallest key will become the root after splaying, and it cannot have a left child because the key of the left child must be smaller than the key of its parent.
+
+Question: What will happen if you select a node `N`, splay its predecessor `P` (the node with the largest key smaller than the key of `N`), then splay the node `N` itself? `N` will be the root, `P` will be the left child of the root, `P` won't have a right child.
+
+After the first splay, `P` will become the root. After the second splay, `N` will become the root, and `P` will become its child, and it will be on the left, because its key is smaller. `P` won't have a right child, because a right child of `P` must have key bigger than the key of `P`, and also it must have key smaller than the key of `N` (because it is now in the left subtree of `N`), but it can't happen, because `P` is the predecessor of `N`, so there are no keys between the key of `P` and the key of `N`.
