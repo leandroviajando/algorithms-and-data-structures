@@ -185,3 +185,88 @@ The **metagraph** (of the connected components) describes how SCCs connect to ea
 In fact, the *metagraph of any graph* $G$ *is always a DAG*. Proof: Suppose not. So there must be a cycle. Any nodes in the cycle can reach any others. So they should all be in the same SCC. Proved by contradiction.
 
 Runtime: $O(\lvert V \rvert + \lvert E \rvert)$
+
+## Paths in Graphs
+
+### Breadth-First Search (BFS)
+
+A **path length** $L(P)$ is the number of edges in a path. The **distance** between two vertices is the length of the shortest path between them.
+
+Vertices and shortest paths between them can be represented with **distance layers**.
+
+This is how BFS works, and it can be implemented with a queue.
+
+The **running time** of BFS is $O(\lvert V \rvert + \lvert E \rvert)$. Proof:
+
+- Each vertex is enqued at most once.
+- Each edge is examined either once (for directed graphs) or twice (for undirected graphs).
+
+#### Shortest Path Tree
+
+The distance layers can be represented as a shortest path tree.
+
+The tree of shortest paths can be built from one origin vertex $s$ by running BFS from $s$.
+
+The tree can then be used to reconstruct the optimal path from any vertex $v$ to $s$, in $O(\lvert V \rvert + \lvert E \rvert)$ time.
+
+### Fastest Route
+
+An algorithm to find the shortest
+paths from a single node to all the nodes in a graph *with non-negative edge weights*.
+
+#### Naive Algorithm
+
+Any subpath of an optimal path is optimal.
+
+**Edge relaxation** checks if $d(v) > d(u) + w(u, v)$, then $d(v) = d(u) + w(u, v)$; giving an upper bound on the distance from $s$ to $v$.
+
+A naive algorithm would be to relax all edges $n-1$ times, giving a runtime of $O(\lvert V \rvert \lvert E \rvert)$.
+
+#### [Dijkstra's Algorithm](https://www.coursera.org/learn/algorithms-on-graphs/lecture/ZS5pm/dijkstra-example)
+
+Maintain a set $R$ of vertices for which `dist` is already set correctly (the "known region").
+
+The first vertex added to $R$ is $s$.
+
+On each iteration, take a vertex outside of $R$ with the smallest `dist` value, add it to $R$, and relax all its outgoing edges.
+
+Dijktra's algorithm can be [implemented](https://www.coursera.org/learn/algorithms-on-graphs/lecture/cgiHK/implementation) with a **priority queue**.
+
+With an **array** priority queue, the running time is $O(V) + T(MakeQueue) + \lvert V \rvert \times T(ExtractMin) + \lvert E \rvert \times T(ChangePriority) = O(\lvert V \rvert + \lvert V \rvert + \lvert V \rvert^2 + \lvert E \rvert) = O(\lvert V \rvert^2)$.
+
+With a **binary heap** priority queue, the running time is: $O(\lvert V \rvert + \lvert V \rvert + \lvert V \rvert \log \lvert V \rvert + \lvert E \rvert \log \lvert V \rvert) = O( ( \lvert V \rvert + \lvert E \rvert ) \log \lvert V \rvert )$.
+
+*Note depending on the number of edges and vertices of the graph, the array or binary heap implementation may be faster*.
+
+For example, if $\lvert E \rvert \approx \lvert V \rvert^2$, then the array implementation is faster.
+
+### Currency Exchange
+
+Input: Currency exchange graph with weighted directed edges $e_i$ between some pairse of currencies with weights $r_{e_i}$ corresponding to the exchange rate.
+
+Output: Maximise $\prod_{j=1}^k{r_{e_j}} = r_{e_1}r_{e_2} \dots r_{e_k}$ over paths $(e_1, e_2, \dots, e_k)$ from USD to RUR in the graph.
+
+#### Reduction to Shortest Paths
+
+- To replace the product with a sum, take the logarithm of the weights: $\log{r_{e_1}} + \log{r_{e_2}} + \dots + \log{r_{e_k}}$.
+- To solve a minimisation problem instead of a maximisation problem, negate the weights: $-\log{r_{e_1}} - \log{r_{e_2}} - \dots - \log{r_{e_k}}$.
+
+Problem: Dijkstra's algorithm doesn't work with negative weights. It relies on the fact that a shortest path from $s$ to $t$ goes only through vertices that are closer to $s$ than $t$. But with negative edge weights, this doesn't hold. So when adding the next vertex to $R$, there may be a shorter path to it through a vertex that is not yet in $R$.
+
+#### Bellman-Ford Algorithm
+
+The Bellman-Ford algorithm is a general algorithm for finding shortest spots in any weighted graphs, incl. negative weighted edges, although no negative cycles (which would result in negative infinity, see below).
+
+The Bellman-Ford algorithm actually relies on the previously seen naive algorithm for shortest paths, which, it turns out, works with negative weights.
+
+Its running time is thus $O(\lvert V \rvert \lvert E \rvert)$.
+
+##### Negative Cycles
+
+A graph $G$ contains a negative weight cycle if the $\lvert V \rvert$th iteration of the Bellman-Ford algorithm updates some `dist` value.
+
+The Bellman-Ford algorithm can thus be used to find a negative cycle in a graph.
+
+##### Infinite Arbitrage
+
+It is possible to get any amount of currency $u$ from currency $S$ if and only if $u$ is reachable from some node $w$ for which `dist[w]` decreased on iteration $\lvert V \rvert$.
