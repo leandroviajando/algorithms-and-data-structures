@@ -39,12 +39,6 @@ repos:
         args: [lint]
         language: system
         pass_filenames: false
-      - id: scan
-        name: scan
-        entry: make
-        args: [scan]
-        language: system
-        pass_filenames: false
       - id: test
         name: test
         entry: make
