@@ -270,3 +270,67 @@ The Bellman-Ford algorithm can thus be used to find a negative cycle in a graph.
 ##### Infinite Arbitrage
 
 It is possible to get any amount of currency $u$ from currency $S$ if and only if $u$ is reachable from some node $w$ for which `dist[w]` decreased on iteration $\lvert V \rvert$.
+
+## Minimum Spanning Trees
+
+Input: A connected, undirected graph $G = (V, E)$ with positive edge weights $w_e$.
+
+Output: A subset of edges $E' \subseteq E$ of minimum total weight that connects all vertices, i.e. such that the graph $(V, E')$ is connected.
+
+A **tree** is an undirected graph that is connected and acyclic. A tree of $n$ vertices has $n-1$ edges.
+
+Any connected undirected graph $G(V, E)$ with $\lvert E \rvert = \lvert V \rvert - 1$ is a tree.
+
+*An undirected graph is a tree iff there is a unique path between any pair of its vertices.*
+
+Therefore, an optimal solution to this problem will in fact be a tree.
+
+### Building a Network
+
+For example, assume that we have six machines in our office and we would like to join them by putting wires between some pairs of them such that each machine is reachable from any other machine.
+
+### Greedy Algorithms
+
+| Kruskal's Algorithm | Prim's Algorithm |
+| --- | --- |
+| repeatedly add the next lightest edge if this doesn't produce a cycle | repeatedly attach a new vertex to the current tree by a lightest edge |
+| use disjoint sets to check whether the current edge joins two vertices from different components | use a priority queue to quickly find the next lightest edge |
+| works well when the graph is sparse (i.e. there are relatively few edges compared to the number of vertices) | works well when the graph is dense (i.e. there are many edges compared to the number of vertices) |
+
+### Cut Property
+
+Let $X \subseteq E$ be a part of a MST of $G(V, E), S \subseteq V$ be such that no edge $X$ crosses between $S$ and $V - S$, and $e \in E$ be a lightest edge across this partition. Then $X + \{e\}$ is a part of some MST.
+
+### Kruskal's Algorithm
+
+- Repeatedly add to $X$ the next lightest edge $e$ that doesn't produce a cycle.
+- At any point of time, the set $X$ is a forest, that is, a collection of trees.
+- The next edge $e$ connects two different trees - say $T_1$ and $T_2$.
+- The edge $e$ is the lightest edge between $T_1$ and $V - T_1$, hence adding $e$ is safe, by the cut property.
+
+Implementation details:
+
+- Use the disjoint sets data structure.
+- Initially, each vertex lies in a separate set.
+- Each set is the set of vertices of a connected component.
+- To check whether the current edge $\{u, v\}$ produces a cycle, check whether $u$ and $v$ belong to the same set.
+
+Running time:
+
+- Sorting edges: $O(\lvert E \rvert \log \lvert E \rvert) = O(\lvert E \rvert \log \lvert V \rvert^2) = O(2 \lvert E \rvert \log \lvert V \rvert) = O(\lvert E \rvert \log \lvert V \rvert)$
+- Processing edges: $2 \lvert E \rvert \times T(Find) + \lvert V \rvert \times T(Union) = O((\lvert E \rvert + \lvert V \rvert) \log \lvert V \rvert) = O(\lvert E \rvert \log \lvert V \rvert)$
+- Total: $O(\lvert E \rvert \log \lvert V \rvert)$
+
+### Prim's Algorithm
+
+- $X$ is always a subtree, grows by one edge at each iteration.
+- Add a lightest edge between a vertex of the tree and a vertex not in the tree.
+- Very similar to Dijkstra's algorithm, uses "priority" (compare with Dijkstra's "cost").
+
+Running time:
+
+- $O(\lvert V \rvert \times T(ExtractMin) + \lvert E \rvert \times T(ChangePriority)) = O((\lvert V \rvert + \lvert E \rvert) \log \lvert V \rvert) = O(\lvert E \rvert \log \lvert V \rvert)$
+
+Running time for array-based implementation:
+
+- $O(\lvert V \rvert + \lvert V \rvert^2 + \lvert E \rvert) = O(\lvert V \rvert^2)$
