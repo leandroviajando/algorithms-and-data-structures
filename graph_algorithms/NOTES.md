@@ -334,3 +334,49 @@ Running time:
 Running time for array-based implementation:
 
 - $O(\lvert V \rvert + \lvert V \rvert^2 + \lvert E \rvert) = O(\lvert V \rvert^2)$
+
+## Advanced Shortest Paths - Advancements on Dijkstra's Algorithm
+
+### Bidirectional Dijkstra's Algorithm
+
+#### Bidirectional Search
+
+Consider again the shortest path problem:
+
+Input: A graph $G$ with *non-negative* edge weights, a source vertex $s$ and a target vertex $t$.
+
+Output: The shortest path between $s$ and $t$.
+
+Dijkstra's algorithm ($O(( \lvert E \rvert + \lvert V \rvert ) \log \lvert V \rvert )$) is pretty fast, but it still has to explore a lot of vertices and edges. For a graph of the USA with 20M vertices and 50M edges it will take several seconds on average - too slow for many applications, i.e. Google Maps.
+
+#### Six Handshakes
+
+#### Bidirectional Dijkstra
+
+#### Finding the Shortest Path after Meeting in the Middle
+
+#### Computing the Distance
+
+### A-Star (A*) Algorithm
+
+#### Performance
+
+#### Bidirectional A*
+
+#### Potential Functions and Lower Bounds
+
+#### Landmarks
+
+### Contraction Hierarchies
+
+#### Highway Hierarchies and Node Importance
+
+#### Preprocessing
+
+#### Witness Search
+
+#### Query
+
+#### Proof of Correctness
+
+#### Node Ordering
