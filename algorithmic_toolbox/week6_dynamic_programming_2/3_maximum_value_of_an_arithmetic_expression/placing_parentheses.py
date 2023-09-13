@@ -12,7 +12,6 @@ def evalt(a: int, b: int, op: str) -> int:  # noqa: C901
 
 
 def get_maximum_value(dataset: str) -> int:
-    # write your code here
     return 0
 
 
