@@ -75,3 +75,41 @@ If all the characters in $S$ are different, all the suffixes will start with dif
 5. What is the smallest possible number of nodes in a suffix tree of string $S$ with length $L$?
 
 If the string $S$ is $aaa \dots aaa$, then all the suffixes of this string are also of the form $aaa \dots aaa$, so they will all fit into the single branch of the suffix tree. This branch will contain the root node and $L$ more nodes for the longest suffix of the string $S$.
+
+## Burrows-Wheeler Transform and Suffix Arrays
+
+### Burrows-Wheeler Transform
+
+In 1994, Michael Burrows and David Wheeler invented an ingenious algorithm for **text compression** that is now known as Burrows-Wheeler Transform.
+
+The Burrows–Wheeler transform of a string `Text` permutes the symbols of `Text` so that it becomes well compressible. Moreover, the transformation is **reversible**: one can recover the initial string `Text` from its Burrows–Wheeler transform. However, data compression is not its only application: it is also used for solving the multiple **pattern matching** problem and the **sequence alignment** problem.
+
+`BWT(Text)` is defined as follows:
+
+1. Form all possible cyclic rotations of `Text`; a cyclic rotation is
+defined by chopping off a suffix from the end of `Text` and appending this suffix to the beginning of `Text`.
+2. Then, order all the cyclic rotations of `Text` lexicographically to form a `|Text|×|Text|` matrix of symbols denoted by `M(Text)`. `BWT(Text)` is the last column of `M(Text)`
+
+#### Pattern Matching with the Burrows-Wheeler Transform
+
+Pattern matching with Suffix Trees runs in $O( \lvert Text \rvert + \lvert Patterns \rvert )$ time, and requires $20 \cdot \lvert Text \rvert$ memory.
+
+Can we use the Burrows-Wheeler Transform to design a more memory-efficient algorithm for pattern matching?
+
+Not only the Burrows–Wheeler transform makes the input string Text well compressible, it also allows one to solve the pattern matching problem using the compressed strings instead of the initial string! This is another beautiful property of the Burrows–Wheeler transform which allows us to avoid decompressing the string, and thus to save lots of memory, while still solving the problem at hand.
+
+### Suffix Arrays
+
+A suffix array is a sorted array of all suffixes of a string.
+
+It can be constructed from a suffix tree with a depth-first traversal of the tree in $O( \lvert Text \rvert )$ linear time and $O( \lvert Text \rvert )$ memory.
+
+#### Pattern Matching with Suffix Arrays
+
+### Approximate Pattern Matching and Mutations of the Genome
+
+*Multiple* Approximate Pattern Matching Problem:
+
+Input: A *set* of strings `Patterns`, a string `Text`, and an integer `d`.
+
+Output: All positions in `Text` where one of the strings in `Patterns` appears as a substring with at most `d` mismatches.
