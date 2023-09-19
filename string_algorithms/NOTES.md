@@ -113,3 +113,105 @@ It can be constructed from a suffix tree with a depth-first traversal of the tre
 Input: A *set* of strings `Patterns`, a string `Text`, and an integer `d`.
 
 Output: All positions in `Text` where one of the strings in `Patterns` appears as a substring with at most `d` mismatches.
+
+## Knuth-Morris-Pratt Algorithm
+
+The Knuth-Morris-Pratt Algorithm is a linear-time exact pattern matching algorithm.
+
+### Exact Pattern Matching
+
+Input: Strings `Text` and `Pattern`
+
+Output: All such positions in `Text` where `Pattern` appears as a substring
+
+A naive brute-force algorithm, sliding the pattern down the text, in the worst case runs in $\Theta( \lvert T \rvert \lvert P \rvert )$.
+
+### Skipping Positions
+
+A **border** of a string $S$ is a prefix of $S$ which is equal to a suffix of $S$, but not equal to the whole of $S$.
+
+Shifting patterns:
+
+1. Find longest common prefix $u$
+2. Find $w$ - the longest border of $u$
+3. Move $P$ such that the prefix $w$ in $P$ aligns with suffix $w$ of $u$ in $T$
+
+Thus, we can skip some of the comparisons.
+
+But we shouldn't miss any of the pattern occurrences in the text. Is it *safe* to shift the pattern this way?
+
+### Safe Shift
+
+Denote by $S_k$ the suffix of string $S$ starting at position $k$.
+
+Let $u$ bet the longest common prefix of $P$ and $T_k$. Let $w$ be the longest border of $u$. Then there are no occurrences of $P$ in $T$ starting between positions $k$ and $(k + \lvert u \rvert - \lvert w \rvert )$ - the start of suffix $w$ in the prefix $u$ of $T_k$.
+
+Thus, it is possible to avoid many of the comparisons of the Brute Force algorithm.
+
+### Prefix Function
+
+How do we determine the best pattern shifts?
+
+A **prefix function** of a string $P$ is a function $s(i)$ that for each $i$ returns the length of the longest border of the prefix $P[0..i]$.
+
+$P[0..i]$ has a border of length $s(i + 1) - 1$.
+
+As a corollary, $s(i + 1) \leq s(i) + 1$.
+
+If $s(i) \gt 0$, then all borders of $P[0..i]$ but for the longest one are also borders of $P[0..s(i) - 1]$.
+
+As a corollary, all borders of $P[0..i]$ can be enumerated by taking the longest border $b_1$ of $P[0..i]$, then the longest border $b_2$ of $b_1$, then the longest border $b_3$ of $b_2$, and so on.
+
+### Computing the Prefix Function
+
+| $P$ | a | b | a | b | a | b | c | a | a | b |
+| --- | - | - | - | - | - | - | - | - | - | - |
+| $s$ | 0 | 0 | 1 | 2 | 3 | 4 | 0 | 1 | 1 | 2 |
+
+```c++
+vector<int> compute_prefix_function(const string& pattern) {
+    vector<int> s(pattern.size());
+    s[0] = 0;
+
+    int border = 0;
+    for (int i = 1; i < pattern.size(); ++i) {
+        while (border > 0 && pattern[i] != pattern[border])
+            border = s[border - 1];
+
+        if (pattern[i] == pattern[border])
+            border++;
+        else
+            border = 0;
+
+        s[i] = border;
+    }
+    return s;
+}
+```
+
+The running time of this algorithm is **linear**, $O( \lvert P \rvert )$.
+
+### The Knuth-Morris-Pratt Algorithm
+
+$P$: `abra`
+$T$: `abracadabra`
+
+| $S$ | a | b | r | a | $ | a | b | r | a | c | a | d | a | b | r | a |
+| --- | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - | - |
+| $s$ | 0 | 0 | 0 | 1 | 0 | 1 | 2 | 3 | 4 | 0 | 1 | 0 | 1 | 2 | 3 | 4 |
+
+```c++
+vector<int> kmp(const strin& pattern, const string& text) {
+    string S = pattern + '$' + text;
+    vector<int> s = compute_prefix_function(S);
+
+    vector<int> result;
+    for (int i = pattern.size() + 1; i < S.size(); ++i)
+        if (s[i] == pattern.size())
+            result.push_back(i - 2 * pattern.size());
+
+    return result;
+}
+```
+
+The running time of the Knuth-Morris-Pratt algorithm is **linear**, $O( \lvert P \rvert + \lvert T \rvert )$.
