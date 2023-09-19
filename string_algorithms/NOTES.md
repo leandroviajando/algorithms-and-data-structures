@@ -215,3 +215,134 @@ vector<int> kmp(const strin& pattern, const string& text) {
 ```
 
 The running time of the Knuth-Morris-Pratt algorithm is **linear**, $O( \lvert P \rvert + \lvert T \rvert )$.
+
+## Constructing Suffix Arrays
+
+Input: String $S$
+
+Output: All suffixes of $S$ in lexicographic order (e.g. `"ab" < "bc"`, `"abc" < "abd"`, `"abc" < "abcd"`)
+
+Memory:
+
+- The total length of all suffixes is $1 + 2 + \dots + \lvert S \rvert = \Theta( \lvert S \rvert^2)$
+- Storing them all is too much memory
+- Therefore, store the order of suffixes $O( \lvert S \rvert )$
+
+For example, given $S = ababaa\$$, suffixes are numbered by their starting positions: $ababaa\$$ is 0, $abaa\$$ is 2, etc. Thus, the suffix array is $[6, 5, 4, 2, 0, 3, 1]$.
+
+### General Construction Strategy
+
+Adding a character $ smaller than all other characters to the end of a string $S$ results in sorting cyclic shifts of $S$ and suffixes of $S$ being equivalent.
+
+Substrings of cyclic string $S$ are called partial cyclic shifts of $S$.
+
+Strategy:
+
+1. Start with sorting single characters of $S$.
+2. Cyclic shifts of length $L = 1$ sorted.
+3. While $L \leq \lvert S \rvert$, sort shifts of length $2L$.
+4. If $L \geq \lvert S \rvert$, cyclic shifts of length $L$ sort the same way as cyclic shifts of length $S$.
+
+```c++
+vector<int> build_suffix_array(const string& text) {
+    vector<int> order = sort_characters(text);
+    vector<int> classes = compute_char_classes(text, order);
+    int L = 1;
+    while (L < text.size()) {
+        order = sort_doubled(text, L, order, classes);
+        classes = update_classes(order, classes, L);
+        L *= 2;
+    }
+    return order;
+}
+```
+
+### Initialisation
+
+```c++
+const int ALPHABET_SIZE = 256;
+
+vector<int> sort_characters(const string& text) {
+    vector<int> order(text.size());
+    vector<int> count (ALPHABET_SIZE, 0);
+    for (int i = 0; i < text.size(); ++i)
+        count[text[i]]++;
+    for (int j = 1; j < ALPHABET_SIZE; ++j)
+        count[j] += count[j - 1];
+    for (int i = text.size() - 1; i >= 0; --i) {
+        int c = text[i];
+        count[c]--;
+        order[count[c]] = i;
+    }
+    return order;
+}
+```
+
+The running time of this algorithm is $O( \lvert S \rvert + \lvert \Sigma \rvert )$.
+
+```c++
+vector<int> compute_char_classes(const string& text, const vector<int>& order) {
+    vector<int> classes(text.size());
+    classes[order[0]] = 0;
+    for (int i = 1; i < text.size(); ++i) {
+        if (text[order[i]] != text[order[i - 1]])
+            classes[order[i]] = classes[order[i - 1]] + 1;
+        else
+            classes[order[i]] = classes[order[i - 1]];
+    }
+    return classes;
+}
+```
+
+The running time of this algorithm is $O( \lvert S \rvert )$.
+
+### Counting Sort
+
+A simple, but crucial observation: the Counting Sort algorithm is stable. It means that it keeps the order of equal elements. Of course, it doesn't matter for the sorting algorithm itself in what order to put equal elements: they can go in any order in the sorted array. But for some algorithms that use sorting it is important, as we will see in the following lecture. If you sort an array which has equal elements using Counting Sort, and one of the two equal elements was before another one initially in the array, it will still go first after sorting. Also see this [answer](http://programmers.stackexchange.com/questions/247440/what-does-it-mean-for-a-sorting-algorithm-to-be-stable) for an example of difference between stable sorting and a non-stable sorting algorithms.
+
+### Sort Doubled Cyclic Shifts
+
+```c++
+vector<int> sort_doubled(const string& text, int L, const vector<int>& order, const vector<int>& classes) {
+    vector<int> count(text.size(), 0);
+    vector<int> new_order(text.size());
+    for (int i = 0; i < text.size(); ++i)
+        count[classes[i]]++;
+    for (int j = 1; j < text.size(); ++j)
+        count[j] += count[j - 1];
+    for (int i = text.size() - 1; i >= 0; --i) {
+        int start = (order[i] - L + text.size()) % text.size();
+        int cl = classes[start];
+        count[cl]--;
+        new_order[count[cl]] = start;
+    }
+    return new_order;
+}
+```
+
+### Updating Classes
+
+```c++
+vector<int> update_classes(const vector<int>& new_order, const vector<int>& classes, int L) {
+    int n = new_order.size();
+    vector<int> new_classes(n);
+    new_classes[new_order[0]] = 0;
+    for (int i = 1; i < n; ++i) {
+        int cur = new_order[i];
+        int prev = new_order[i - 1];
+        int mid = (cur + L) % n;
+        int mid_prev = (prev + L) % n;
+        if (classes[cur] != classes[prev] || classes[mid] != classes[mid_prev])
+            new_classes[cur] = new_classes[prev] + 1;
+        else
+            new_classes[cur] = new_classes[prev];
+    }
+    return new_classes;
+}
+```
+
+## From Suffix Arrays to Suffix Trees
+
+### LCP Arrays
+
+### Constructing Suffix Trees
