@@ -148,3 +148,143 @@ The Marriage Lemma: Let $G$ be a bipartite graph with $n$ vertices on either sid
 - Compute a maxflow $f$ for $G$
 - Compute residual $G_f$
 - Let $C$ be the collection of vertices reachable from $s$ in $G_f$
+
+## Linear Programming
+
+Given some real numbers $x_1, x_2, \dots, x_n$ satisfying some linear inequalities
+
+$$
+a_{11}x_1 + a_{12}x_2 + \dots + a_{1n}x_n \leq b_1 \\
+a_{m1}x_1 + a_{m2}x_2 + \dots + a_{mn}x_n \leq b_m
+$$
+
+maximise (or minimise) some linear objective function
+
+$$
+v_1x_1 + v_2x_2 + \dots + v_nx_n
+$$
+
+Input: An $m \times n$ matrix $A$ and vectors $b \in \R^m, v \in \R^n$
+
+Output: A vector $x \in \R^n$ s.t. $Ax \leq b$ and $v^Tx$ is maximised (or minimised).
+
+*Network flows are actually a special case of linear programming:*
+
+$$
+0 \leq f_e \leq C_e \forall e \\
+\sum_{e \in \delta^-(v)} f_e - \sum_{e \in \delta^+(v)} f_e = 0 \forall v \neq s, t
+$$
+
+### Convexity
+
+A linear equation defines a hyperplane. A linear inequality defines a half-space.
+
+So a system of linear inequalities defines a region bounded by a bunch of hyperplanes.
+
+A **polytope** is a region in $\R^n$ bounded by finitely many flat surfaces. These surfaces may intersect in lower-dimensional **facets** (like edges); with zero-dimensional facets called **vertices**.
+
+But not every polytope is possible. Everything must be on one side of each face.
+
+A region $C \subset \R^n$ is **convex** if for any $x, y \in C$ the line segment connecting $x$ and $y$ is contained in $C$.
+
+An intersection of halfspaces is convex.
+
+*The region defined by a system of linear inequalities is always a convex polytope.*
+
+Let $C$ be a convex region and $x \notin C$ a point. Then there is a hyperplane $H$ separating $x$ from $C$.
+
+A linear function on a polytope takes its minimum / maximum values on vertices.
+
+In summary,
+
+- a region determined by LP is always a convex polytope
+- the optimum is always at a vertex
+- the convex polytope can be separated from outside points by hyperplanes
+
+### Duality
+
+Given a (primal) linear program
+
+$$
+\min_{Ax \leq b}{v^Tx}
+$$
+
+the **dual linear program** is the linear programme
+
+$$
+\max_{y \geq 0, y^TA = v}{b^Ty}
+$$
+
+The dual bounds is the optimum for the primal. In fact, *a linear programme and its dual always have the same (numerical) answer.*
+
+Consider such a primal and dual LP. Then in the solutions, $y_i \gt 0$ olny if the $i^{th}$ inequality is tight. So, the dual solution gives a certificate that the primal solution is optimal.
+
+### LP Formulations
+
+- Full Optimisation: Minimise or maximise a linear function subject to a system of linear inequality constraints (or say that the constraints have no solution).
+- Optimisation from a Starting Point: Given a system of linear inequalities and a vertex of the polytope they define, optimise a linear function with respect to these constraints.
+- Solution Finding: Given a system of linear inequalities, find some solution.
+- Satisfiability: Given a system of linear inequalities, determine whether or not there is a solution.
+
+**Equivalence:** Actually, if you can solve any of these problems, you can solve all of them.
+
+Technical point: Things are a bit messier if some intermediate systems don't have optima.
+
+Fix: Start with $n$ constraints (this gives a single vertex). Then while trying to add a constraint $v^Tx \geq t$, don't just maximise $v^Tx$, also add $v^Tx \leq t$ as a constraint - so that the maximum will exist.
+
+Solution finding: How to find the best solution?
+
+Duality: Instead of
+
+$$
+\min_{Ax \leq b}{v^Tx}
+$$
+
+instead find the solution to:
+
+$$
+Ax \leq b \\
+y \geq 0 \\
+y^TA = v \\
+x^Tv = y^Tb
+$$
+
+This will give the optimal solution to the original problem.
+
+### The Simplex Algorithm
+
+The Simplex algorithm is one of the oldest algorithms for solving linear programmes, and still one of the most efficient - although the runtime is not quite what we would like.
+
+- Vertex $p$ when $n$ defining equations are tight (solve with Gaussian elimination).
+- Relax one equation to get an edge. Points of form $p + tw, t \geq 0$.
+- Edge continues until it violates some other constraint.
+- If $v^Tw \gt 0$, then $p + tw$ is better than $p$, i.e. can follow the edge to find a larger value of the objective.
+
+Theorem: If $p$ is a vertex that is not optimal, there is some adjacent vertex that does better.
+
+The runtime of the algorithm is proportional to the path length. Path length is usually pretty reasonable. However, there are examples where the path length is exponential in the number of variables.
+
+**Degeneracy:** If more than $n$ constraints are tight, i.e. more than $n$ hyperplanes intersect at a vertex, then the vertex is degenerate. This can cause the Simplex algorithm to get stuck in a loop, not knowing which equation to relax.
+
+Fix: Tweak equations a bit to avoid these intersections, by making infinitesimal changes: Strengthen first by $\epsilon$, next by $\epsilon^2$, etc.
+
+In summary, the Simplex algorithm
+
+- solves LPs
+- works well most of the time
+- but may be exponential in some cases
+
+### The Ellipsoid Algorithm
+
+- solves LPs
+- can run with only a separation oracle
+- runs in polynomial time in all cases, i.e. has better worst-case performance then simplex
+- but in practice is actually often slower
+
+The algorithm:
+
+1. Relax all equations a bit.
+2. Bound solution set in large ball.
+3. Given this ellipsoid that contains all solutions, see if the centre of the ellipsoid is a solution.
+
+    (a) If it is a solution, the system is satisfiable.
