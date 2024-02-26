@@ -1,6 +1,7 @@
 # Data Structures and Algorithms
 
 [LeetCode Top 150](https://leetcode.com/studyplan/top-interview-150/)
+[Grokking Coding Interview Patterns in C++](https://www.educative.io/courses/grokking-coding-interview-patterns-cpp/)
 
 ## [Algorithms and Data Structures](https://www.coursera.org/specializations/data-structures-algorithms)
 
